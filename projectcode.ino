@@ -1,11 +1,17 @@
-#include <Adafruit_CircuitPlayground.h>
+#include <Adafruit_CircuitPlayground.h> // libraries
 
+//global variables
 float value; 
+float midi[127];
+int A_four = 440;
 
 int points = 0;
 bool shouldContinue = true;
 const int switchPin = 7;
 
+int noise [6] = {60, 70, 80, 90, 100, 110};
+
+//setup, includes start fuctions and initializers for switch
 void setup() {
 Serial.begin(9600);
 CircuitPlayground.begin();
@@ -14,6 +20,7 @@ pinMode(switchPin, INPUT_PULLUP);
 shouldContinue = (digitalRead(switchPin) == LOW);
 }
 
+//est. point system
 void addPoints(int amount){
   points += amount;
 }
@@ -21,15 +28,20 @@ void addPoints(int amount){
 
 void loop() {
 
+//if the switch is LOW, or on, then the code will run. If it is not, the code will break and stop
 if(digitalRead(switchPin) == LOW){
 if(!shouldContinue){
   return;
 }
 
-delay(1000);
+//tone before color loop
+CircuitPlayground.playTone(80, 100);
 
+//sound gauge
 value = CircuitPlayground.mic.soundPressureLevel(5);
 
+// if the value is under the threshold (< 60 in this first part), then 1 point will be will be added and red will run
+//if it's over the threshold, then it will go to the next part and run with points aloted until it reaches the correct threshold
  if (value < 60){
   for(int led = 0; led < 10; led++){
     CircuitPlayground.setPixelColor(led, 255, 0, 0);//red
@@ -73,13 +85,17 @@ else if (value > 105){
 }
 addPoints(10);}
 
+//score keep
 Serial.print("Current Points:");
 Serial.println(points);
 
+//if the points exceed 100, then the game ends
 if(points >= 100){
   shouldContinue = false;
 }
 
+//small delay
+//else statement is saying that if the switchPin is HIGH, or off, then the code will stop running
 delay(10);
 }
 else{
